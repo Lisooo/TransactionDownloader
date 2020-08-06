@@ -3,7 +3,7 @@ from transactions_downloader.pages import UserPassPage, HomePage
 from transactions_downloader.utils import DateUtils, TimeUtils, FileUtils, DBUtils
 
 if __name__ == "__main__":
-
+    print("HELLO")
     userpassPage = UserPassPage(driver)
     homePage = HomePage(driver)
     #
