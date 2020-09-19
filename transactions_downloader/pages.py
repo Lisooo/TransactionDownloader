@@ -126,7 +126,6 @@ class HomePage(Page):
                     TimeUtils.wait_x_sec(2)
 
                 date_rslt = self.click_element_result(l_date_text_xpath)
-                print("New date_rslt" + str(date_rslt))
             else:
                 self.click_element_xpath(l_oday_xpath)
 
