@@ -7,7 +7,7 @@ from transactions_downloader.locators import UserPassPageLocators, HomePageLocat
 from transactions_downloader.utils import DateUtils, TimeUtils
 
 
-class Page:
+class Page(object):
 
     def __init__(self, driver):
         self.driver = driver
