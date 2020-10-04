@@ -5,7 +5,7 @@ class UserPassPageLocators(object):
 
 
 class HomePageLocators(object):
-    # history_link_xpath = ".//a[text()='wszystkie operacje']" #OLD VERSION BCKP
+
     history_link_xpath = ".//span[text()='Historia']"
     dateFrom_xpath = ".//input[contains(@name,'dateFrom')]"
     dateTo_xpath = ".//input[contains(@name,'dateTo')]"
@@ -15,36 +15,27 @@ class HomePageLocators(object):
     prevMonth_xpath = ".//button/span[text()='Poprzedni miesiąc']"
     nextYear_xpath = ".//button/span[text()='Następny rok']"
     prevYear_xpath = ".//button/span[text()='Poprzedni rok']"
+    myProductList_xpath = ".//button/span[text()='Moje produkty']"
+    cardsList_xpath = ".//div/a[text()='Karty']"
 
     @staticmethod
     def file_format_xpath(v_file_format):
-        v_file_format = str(v_file_format)
-        file_format_xpath = ".//div/a[text()=" + v_file_format + "]"
-        return file_format_xpath
+        return ".//div/a[text()=" + str(v_file_format) + "]"
 
     @staticmethod
     def date_text_xpath(v_month, v_year):
-        v_month = str(v_month)
-        v_year = str(v_year)
-        date_text_xpath = ".//div[@class!='last_login' and @class!='copyright' and text()[contains(.,'" + v_month + \
-                          " " + v_year + "')]]"
-        return date_text_xpath
+        return ".//div[@class!='last_login' and @class!='copyright' and text()[contains(.,'" + str(v_month) + \
+                          " " + str(v_year) + "')]]"
 
     @staticmethod
     def day_xpath(v_day):
-        v_day = str(v_day)
-        day_xpath = ".//div/label/div[text()=" + v_day + "]"
-        return day_xpath
+        return ".//div/label/div[text()=" + str(v_day) + "]"
 
     @staticmethod
     def year_text_xpath(v_year):
-        v_year = str(v_year)
-        year_text_xpath = ".//div[@class!='last_login' and @class!='copyright' " \
-                          "and text()[contains(.,'" + v_year + "')]]"
-        return year_text_xpath
+        return ".//div[@class!='last_login' and @class!='copyright' " \
+                          "and text()[contains(.,'" + str(v_year) + "')]]"
 
     @staticmethod
-    def month_name_xpath(v_month_name):
-        v_month_name = str(v_month_name)
-        mont_name_xpath = ".//div[text()[contains(.,'" + v_month_name + "')]]"
-        return mont_name_xpath
+    def month_name_xpath(v_month_nm):
+        return ".//div[text()[contains(.,'" + str(v_month_nm) + "')]]"

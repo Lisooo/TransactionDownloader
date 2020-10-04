@@ -1,10 +1,11 @@
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException,StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 from transactions_downloader.locators import UserPassPageLocators, HomePageLocators
 from transactions_downloader.utils import DateUtils, TimeUtils
+from transactions_downloader.params import LoginParams, FileParams
 
 
 class Page(object):
@@ -51,6 +52,8 @@ class UserPassPage(Page):
     def __init__(self, driver):
         super().__init__(driver)
         self.locators = UserPassPageLocators
+        self.username = LoginParams.username
+        self.password = LoginParams.password
 
     def enter_login_param(self, param):
         self.clear_element_xpath(self.locators.userpass_textbox_xpath)
@@ -62,12 +65,12 @@ class UserPassPage(Page):
     def click_login_button(self):
         self.click_element_xpath(self.locators.login_button_xpath)
 
-    def login(self, user, password):
-        self.enter_login_param(user)
+    def login(self):
+        self.enter_login_param(self.username)
         TimeUtils.wait_x_sec(1)
         self.click_next_button()
         TimeUtils.wait_x_sec(1)
-        self.enter_login_param(password)
+        self.enter_login_param(self.password)
         TimeUtils.wait_x_sec(1)
         self.click_login_button()
 
@@ -77,6 +80,7 @@ class HomePage(Page):
     def __init__(self, driver):
         super().__init__(driver)
         self.locators = HomePageLocators
+        self.file_format = FileParams.file_format
 
     def click_history_link(self):
         self.click_element_xpath(self.locators.history_link_xpath)
@@ -87,20 +91,20 @@ class HomePage(Page):
         elif v_fieldtype == 2:
             v_input_date = self.get_attr_from_xpath("value", self.locators.dateFrom_xpath)
         else:
-            print("Błędny V_FIELDTYPE: " + str(v_fieldtype))
+            print(f"Błędny V_FIELDTYPE: {v_fieldtype}")
             quit()
 
         return v_input_date
 
     def click_input_field(self, v_day, v_month, v_year, v_fieldtype):
         if v_fieldtype == 1:
-            print("Wprowadzam datę DO: " + str(v_day) + "-" + str(v_month) + "-" + str(v_year))
+            print(f"Wprowadzam datę DO:  {v_day} -  {v_month} - {v_year}")
             self.click_element_xpath(self.locators.dateTo_xpath)
         elif v_fieldtype == 2:
-            print("Wprowadzam datę OD: " + str(v_day) + "-" + str(v_month) + "-" + str(v_year))
+            print(f"Wprowadzam datę OD:  {v_day} -  {v_month} - {v_year}")
             self.click_element_xpath(self.locators.dateFrom_xpath)
         else:
-            print("Błędny V_FIELDTYPE: " + str(v_fieldtype))
+            print(f"Błędny V_FIELDTYPE: {v_fieldtype}")
             quit()
 
     def set_date_into_input_field(self, v_day, v_month, v_year, v_fieldtype):
@@ -159,15 +163,18 @@ class HomePage(Page):
                 else:
                     self.click_element_xpath(l_oday_xpath)
 
-    def set_date_input(self, v_day, v_month, v_year, v_fieldtype):
+    def set_date_input(self, v_date, v_fieldtype):
+        v_day, v_month, v_year = DateUtils().get_variables_from_date(v_date)
         self.click_input_field(v_day, v_month, v_year, v_fieldtype)
         self.set_date_into_input_field(v_day, v_month, v_year, v_fieldtype)
+        TimeUtils.wait_x_sec(2)
 
-    def download_file(self, file_format):
+    def download_file(self):
         rslt = self.click_element_result(self.locators.no_results_div_xpath)
         if rslt is False:
             self.click_element_xpath(self.locators.download_xpath)
-            self.click_element_xpath(self.locators.file_format_xpath(file_format))
+            self.click_element_xpath(self.locators.file_format_xpath(self.file_format))
+            TimeUtils.wait_x_sec(2)
             return True, ' '
         else:
             return False, 'There was no transaction on that day'
