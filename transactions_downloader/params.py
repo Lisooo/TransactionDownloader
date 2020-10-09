@@ -16,11 +16,13 @@ class LoginParams(object):
     password = os.environ.get('IpkoPass')
 
 
+class DateParams(object):
+    start_dt = datetime.date(year=2019, month=1, day=1)
+    current_dt = datetime.date.today()
+    current_dttm = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+
+
 class FileParams(object):
     files_dir = os.environ.get('CsvFilesDir')
+    logs_dir = "logs/"
     file_format = "'CSV'"
-
-
-class DatesParams(object):
-    curr_datetime = datetime.datetime.today()   # current datetime
-    start_dt = datetime.date(year=2019, month=1, day=1)     # setting start day for HomeBudget Project

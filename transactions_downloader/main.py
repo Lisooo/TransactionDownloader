@@ -1,13 +1,20 @@
 from transactions_downloader.pages import UserPassPage, HomePage
 from transactions_downloader.drivers import FirefoxDriver
 from transactions_downloader.import_log.utils import ImportLog
+from transactions_downloader.connections import HomeBudgetConnection
 from transactions_downloader.files.utils import FileUtils
-
+from transactions_downloader.loggers import Logger
 
 #   SETTING/INITIATE PHASE
-driver = FirefoxDriver().setup()    # initiate driver
-import_log = ImportLog()  # setting instance for ImportLog
+logger = Logger('Main').logger()
+logger.info(f'Started'.upper())
 
+connection = HomeBudgetConnection().set()   # setting instance for db connection
+cursor = connection.cursor()    # setting cursor to db operations
+
+import_log = ImportLog(cursor)  # setting instance for ImportLog
+
+driver = FirefoxDriver().setup()    # initiate driver
 userpassPage = UserPassPage(driver)
 homePage = HomePage(driver)
 
@@ -27,10 +34,12 @@ for str_date in import_log.generate_date_list_to_download():
 
         #   Insert into IMPORT_CSV
         import_log.insert_into_import_log(v_new_file_nm, str_date, v_msg, 'N', 'N')
+        connection.commit()
 
     else:
-        print("There is no file for modify")
         import_log.insert_into_import_log('', str_date, v_msg, ' ', ' ')
+        connection.commit()
 
+logger.info(f'Ended successful'.upper())
 driver.close()
 driver.quit()

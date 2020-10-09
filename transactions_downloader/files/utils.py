@@ -1,21 +1,30 @@
 import os
 from transactions_downloader.utils import DateUtils
 from transactions_downloader.params import FileParams
+from transactions_downloader.loggers import Logger
+
+file_log = Logger('File').logger()
 
 
 class FileUtils(object):
 
-    def __init__(self):
+    def __init__(self, file_nm=None):
         self.dir = FileParams.files_dir
 
-        # get latest file_nm
-        self.file_nm = max([f for f in os.listdir(self.dir)],
-                               key=lambda xa: os.path.getctime(os.path.join(self.dir, xa)))
+        if file_nm:
+            # get provided file_nm
+            self.file_nm = file_nm
+        else:
+            # get latest (recently downloaded) file_nm
+            self.file_nm = max([f for f in os.listdir(self.dir)],
+                                   key=lambda xa: os.path.getctime(os.path.join(self.dir, xa)))
 
         self.file_dt = self.file_nm.replace('history_csv_', '')[0:8]
         self.file_path = os.path.join(self.dir, self.file_nm)
-
         self.new_file_dt = ''
+
+        file_log.info(f'Started with params:')
+        file_log.info(f'#File_nm# {self.file_nm}')
 
     def get_files_list_from_dir(self):
         return os.listdir(self.dir)  # list of files in directory
@@ -40,5 +49,5 @@ class FileUtils(object):
         v_new_file_path = os.path.join(self.dir, v_new_file_nm)
 
         os.rename(self.file_path, v_new_file_path)
-        print(f"File name was changed from: {self.file_path} to {v_new_file_path}")
+        file_log.info(f'File name was changed from: {self.file_path} to {v_new_file_path}')
         return v_new_file_nm

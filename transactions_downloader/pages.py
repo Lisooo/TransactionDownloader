@@ -6,6 +6,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from transactions_downloader.locators import UserPassPageLocators, HomePageLocators
 from transactions_downloader.utils import DateUtils, TimeUtils
 from transactions_downloader.params import LoginParams, FileParams
+from transactions_downloader.loggers import Logger
+
+userpasspage_log = Logger('UserPassPage').logger()
+homepage_log = Logger('HomePage').logger()
 
 
 class Page(object):
@@ -55,6 +59,9 @@ class UserPassPage(Page):
         self.username = LoginParams.username
         self.password = LoginParams.password
 
+        userpasspage_log.info(f'Started with params:')
+        userpasspage_log.info(f'#Username# {self.username}; #Password# {self.password.replace(self.password, "*****")}')
+
     def enter_login_param(self, param):
         self.clear_element_xpath(self.locators.userpass_textbox_xpath)
         self.sendkeys_element_xpath(self.locators.userpass_textbox_xpath, param)
@@ -74,6 +81,8 @@ class UserPassPage(Page):
         TimeUtils.wait_x_sec(1)
         self.click_login_button()
 
+        userpasspage_log.info(f'Logged successfully')
+
 
 class HomePage(Page):
 
@@ -82,29 +91,34 @@ class HomePage(Page):
         self.locators = HomePageLocators
         self.file_format = FileParams.file_format
 
+        homepage_log.info(f'Started with params:')
+        homepage_log.info(f'#Fileformat# {self.file_format}')
+
     def click_history_link(self):
         self.click_element_xpath(self.locators.history_link_xpath)
 
     def get_date_from_input(self, v_fieldtype):
+        v_name = f'#{self.get_date_from_input.__name__}#'
+
         if v_fieldtype == 1:
             v_input_date = self.get_attr_from_xpath("value", self.locators.dateTo_xpath)
         elif v_fieldtype == 2:
             v_input_date = self.get_attr_from_xpath("value", self.locators.dateFrom_xpath)
         else:
-            print(f"Błędny V_FIELDTYPE: {v_fieldtype}")
+            homepage_log.error(f"{v_name} Something went wrong")
             quit()
 
         return v_input_date
 
-    def click_input_field(self, v_day, v_month, v_year, v_fieldtype):
+    def click_input_field(self, v_fieldtype):
+        v_name = f'#{self.click_input_field.__name__}#'
+
         if v_fieldtype == 1:
-            print(f"Wprowadzam datę DO:  {v_day} -  {v_month} - {v_year}")
             self.click_element_xpath(self.locators.dateTo_xpath)
         elif v_fieldtype == 2:
-            print(f"Wprowadzam datę OD:  {v_day} -  {v_month} - {v_year}")
             self.click_element_xpath(self.locators.dateFrom_xpath)
         else:
-            print(f"Błędny V_FIELDTYPE: {v_fieldtype}")
+            homepage_log.error(f"{v_name} Something went wrong")
             quit()
 
     def set_date_into_input_field(self, v_day, v_month, v_year, v_fieldtype):
@@ -164,10 +178,18 @@ class HomePage(Page):
                     self.click_element_xpath(l_oday_xpath)
 
     def set_date_input(self, v_date, v_fieldtype):
-        v_day, v_month, v_year = DateUtils().get_variables_from_date(v_date)
-        self.click_input_field(v_day, v_month, v_year, v_fieldtype)
-        self.set_date_into_input_field(v_day, v_month, v_year, v_fieldtype)
-        TimeUtils.wait_x_sec(2)
+        v_name = f'#{self.set_date_input.__name__}#'
+
+        if v_fieldtype in (1, 2):
+            v_choice = str(v_fieldtype).replace('1', 'to').replace('2', 'from')
+            v_day, v_month, v_year = DateUtils().get_variables_from_date(v_date)
+            self.click_input_field(v_fieldtype)
+            self.set_date_into_input_field(v_day, v_month, v_year, v_fieldtype)
+            TimeUtils.wait_x_sec(2)
+            homepage_log.info(f"{v_name} sets date_{v_choice} {v_date} properly ")
+        else:
+            homepage_log.error(f"{v_name} Wrong v_fieldtype (only 1 or 2): {v_fieldtype}")
+            quit()
 
     def download_file(self):
         rslt = self.click_element_result(self.locators.no_results_div_xpath)
@@ -175,6 +197,8 @@ class HomePage(Page):
             self.click_element_xpath(self.locators.download_xpath)
             self.click_element_xpath(self.locators.file_format_xpath(self.file_format))
             TimeUtils.wait_x_sec(2)
+            homepage_log.info(f'File downloaded properly')
             return True, ' '
         else:
+            homepage_log.info(f'There was no transaction on that day')
             return False, 'There was no transaction on that day'

@@ -1,20 +1,24 @@
-import datetime
-from transactions_downloader.params import DatesParams
 from transactions_downloader.files.utils import FileUtils
-from transactions_downloader.connections import HomeBudgetConnection
+from transactions_downloader.loggers import Logger
+from transactions_downloader.params import DateParams
+import datetime
+
+logger = Logger('Import_Log').logger()
 
 
 class ImportLog(object):
 
-    def __init__(self):
-        self.table_nm = "Import_log"
-        self.connection = HomeBudgetConnection().set()   # setting connection
-        self.cursor = self.connection.cursor()
+    def __init__(self, cursor):
+        self.table_nm = 'Import_log'
+        self.cursor = cursor
 
         self.files_dir = FileUtils().get_files_list_from_dir()
-        self.start_dt = DatesParams.start_dt
-        self.current_dttm = DatesParams.curr_datetime
-        self.current_dt = self.current_dttm.date()
+        self.start_dt = DateParams.start_dt
+        self.current_dt = DateParams.current_dt
+        self.current_dttm = DateParams.current_dttm
+
+        logger.info(f'Started with params:')
+        logger.info(f'#Start_dt# {self.start_dt}, #Current_dt# {self.current_dt}, #Current_dttm# {self.current_dttm}')
 
     def import_log_dates_into_list(self):
         rslt = self.cursor.execute("Select to_char(operation_dt,'YYYY-MM-DD') from " + self.table_nm
@@ -33,7 +37,7 @@ class ImportLog(object):
         else:
             new_id = self.cursor.execute("SELECT max(nvl(file_id,0)) FROM " + self.table_nm + "").fetchone()
 
-            if new_id == 0:  # w przypadku pierwszego wpisu (pusta tabela)
+            if new_id == 0:  # in case of first record
                 new_id = 1
             else:
                 new_id = int(new_id[0]) + 1
@@ -46,15 +50,14 @@ class ImportLog(object):
                            "import_flg": v_import_flg,
                            "etl_flg": v_etl_flg}
 
-            print(dict_values)
-
             v_sql = f"INSERT INTO {self.table_nm} VALUES (:file_id, :file_nm, :operation_dt" \
                 f", :download_dttm, :download_msg, :import_flg, :etl_flg)"
 
             self.cursor.execute(v_sql, [dict_values['new_id'], dict_values['file_nm'], dict_values['oprtn_dt']
                                 ,dict_values["download_dttm"], dict_values["download_msg"], dict_values["import_flg"]
                                 ,dict_values["etl_flg"]])
-            self.connection.commit()
+
+            logger.info(f'Record added properly')
 
     def generate_date_list_to_download(self):
         v_dt_list = []
@@ -77,11 +80,11 @@ class ImportLog(object):
                 # print(v_date + ": exists in IMPORT CSV log (probably no transactions on that day)")
                 pass
             else:
-                print(v_date + ": added into download date list")
                 v_final_dt_list.append(v_date)
+                logger.info(f"{v_date} added into download date list")
 
             self.start_dt = self.start_dt + datetime.timedelta(days=1)
         if len(v_final_dt_list) == 0:
-            print(f"[INFO] Date list is empty")
+            logger.info(f"Date list is empty")
 
         return v_final_dt_list
