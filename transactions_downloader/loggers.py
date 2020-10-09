@@ -21,33 +21,3 @@ class Logger(object):
         logger.isEnabledFor(logging.WARNING)
         logger.isEnabledFor(logging.ERROR)
         return logger
-
-
-# logger = Logger.logger()
-# logging.basicConfig(filename=f'logs/{logger.name}.log', level=logging.INFO)
-
-#
-# class ImportLog(object):
-#
-#     def __init__(self, cursor):
-#         self.table_nm = "Import_log"
-#         self.cursor = cursor
-#
-#         self.files_dir = FileUtils().get_files_list_from_dir()
-#         self.start_dt = datetime.date(year=2019, month=1, day=1)
-#         self.current_dt = datetime.date.today()
-#         self.current_dttm = datetime.datetime.today()
-#
-#         logger.info(f'Created ImportLog Instance with params: '
-#                     f'\n- start_dt {self.start_dt} '
-#                     f'\n- current_dt {self.current_dt} '
-#                     f'\n- current_dttm {self.current_dttm}')
-
-# def my_logger(orig_func):
-#     logging.basicConfig(filename=f'logs/{orig_func.__name__}.log', level=logging.INFO)
-#
-#     def wrapper(*args, **kwargs):
-#         logging.info(f' [{datetime.datetime.today()}] Ran with args: {args}, and kwargs: {kwargs}')
-#         return orig_func(*args, **kwargs)
-#
-#     return wrapper
